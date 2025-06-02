@@ -2,7 +2,6 @@ import subprocess
 import json
 from datetime import timedelta
 
-# https://www.youtube.com/watch?v=q08L8gYtSU0
 def extract_chapters(url):
     result = subprocess.run(
         ['yt-dlp', '--print-json', '--skip-download', url],
@@ -47,7 +46,6 @@ def download_selected_chapters(url, chapters, title, selected_indexes):
             "yt-dlp",
             "-x",
             "--download-sections", time_range,
-            #"-f", "bestaudio[ext=opus]",
             "-o", output_name,
             url
         ])
@@ -65,7 +63,7 @@ if __name__ == "__main__":
         else:
             print("Downloading full audio...")
             subprocess.run([
-                "yt-dlp", "-f", "bestaudio[ext=opus]", "-o", f"{title}.%(ext)s", url
+                "yt-dlp", "-x", "-o", f"{title}.%(ext)s", url
             ])
     else:
         print("\nAvailable chapters:")
