@@ -2,7 +2,6 @@ import subprocess
 import json
 from datetime import timedelta
 
-#comment git test
 def extract_chapters(url):
     result = subprocess.run(
         ['yt-dlp', '--print-json', '--skip-download', url],
@@ -52,11 +51,33 @@ def download_selected_chapters(url, chapters, title, selected_indexes):
         ])
     print("Selected chapters downloaded.")
 
+
+#Working -  "yt-dlp", "-x", "-o", f"{title}.%(ext)s", url
+def download_full_audio(url, title):
+    print("Downloading full audio...")
+    subprocess.run([
+        "yt-dlp", "-x", "-o", f"{title}.%(ext)s", url
+    ])
+
+
+def download_section(url, title, start, end):
+    section = f"*{start}-{end}"
+    print(f"Downloading section {start} to {end} ...")
+    subprocess.run([
+        "yt-dlp",
+        "--download-sections", section,
+        "-x",
+        "-o", f"{title}_section_{start.replace(':', '-')}_to_{end.replace(':', '-')}.%(ext)s",
+        url
+    ])
+
+# 00:00:00 to 00:00:30
 if __name__ == "__main__":
     url = input("Enter YouTube URL: ").strip()
     chapters, title = extract_chapters(url)
 
     if not chapters:
+        """"
         print("No chapters found.")
         ans = input('Download entire audio instead? (y/n): ').strip().lower()
         if ans == 'n':
@@ -66,6 +87,27 @@ if __name__ == "__main__":
             subprocess.run([
                 "yt-dlp", "-x", "-o", f"{title}.%(ext)s", url
             ])
+        """
+        while True:
+            choice = input("What do you want to do?\n1. Download full audio\n2. Download a section\nEnter 1 or 2: ").strip()
+            if choice == "1":
+                download_full_audio(url, title)
+                break
+            elif choice == "2":
+                time_input = input("Enter start and end times (hh:mm:ss - hh:mm:ss): ").strip()
+                try:
+                    start, end = [t.strip() for t in time_input.split('-')]
+                    # Basic validation of hh:mm:ss format
+                    assert len(start.split(':')) == 3 and len(end.split(':')) == 3
+                    download_section(url, title, start, end)
+                    break
+                except Exception as e:
+                    print("Invalid time format. Please use hh:mm:ss - hh:mm:ss")
+                    print("Error:", e)
+            else:
+                print("Invalid choice, please enter 1 or 2.")
+
+
     else:
         print("\nAvailable chapters:")
         for i, ch in enumerate(chapters, 1):
